@@ -125,7 +125,31 @@
                   android:layout_height="wrap_content"
                   />
     </LinearLayout>
-
+    <!-- call location info-->
+    <LinearLayout android:id="@+id/calllocate_info"
+                  android:orientation="horizontal"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:layout_marginTop="-6dip">
+        <TextView android:id="@+id/calllocate_location"
+                  android:textColor="#29c2de"
+                  android:textAppearance="?android:attr/textAppearanceSmall"
+                  android:textSize="18sp"
+                  android:singleLine="true"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:paddingRight="6dip"
+                  />
+        <TextView android:id="@+id/calllocate_type"
+                  android:textColor="#29c2de"
+                  android:textAppearance="?android:attr/textAppearanceSmall"
+                  android:textSize="18sp"
+                  android:singleLine="true"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  />
+    </LinearLayout>
     <!-- Call type indication: a special label and/or branding
          for certain kinds of calls -->
     <TextView android:id="@+id/callTypeLabel"

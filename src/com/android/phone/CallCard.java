@@ -18,6 +18,7 @@ package com.android.phone;
 
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.pim.ContactsAsyncHelper;
@@ -36,6 +37,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.database.Cursor;
 
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallerInfo;
@@ -96,6 +98,10 @@ public class CallCard extends FrameLayout
     private TextView mLabel;
     private TextView mCallTypeLabel;
     private TextView mSocialStatus;
+
+    // call locate info
+    private TextView mCallocateLocation;
+    private TextView mCallocateType;
 
     // Info about the "secondary" call, which is the "call on hold" when
     // two lines are in use.
@@ -200,6 +206,9 @@ public class CallCard extends FrameLayout
         mCallTypeLabel = (TextView) findViewById(R.id.callTypeLabel);
         mSocialStatus = (TextView) findViewById(R.id.socialStatus);
         mOrganization = (TextView) findViewById(R.id.organization);
+        // call locate info
+        mCallocateLocation =  (TextView) findViewById(R.id.calllocate_location);
+        mCallocateType = (TextView) findViewById(R.id.calllocate_type);
 
         // "Other call" info area
         mSecondaryCallName = (TextView) findViewById(R.id.secondaryCallName);
@@ -1079,6 +1088,8 @@ public class CallCard extends FrameLayout
         Drawable socialStatusBadge = null;
 
         boolean updateName = false;
+        String calllocateLocation = null;
+        String calllocateType = null;
 
         if (info != null) {
             // It appears that there is a small change in behaviour with the
@@ -1093,6 +1104,23 @@ public class CallCard extends FrameLayout
             // appears that this was the ONLY call to PhoneUtils
             // .getCallerInfo() that relied on a NULL CallerInfo to indicate
             // an unknown contact.
+              try {
+                  if(!TextUtils.isEmpty(info.phoneNumber)) {
+                      ContentResolver cr = getContext().getContentResolver();
+                      Cursor cu = cr.query(Uri.parse(
+                          "content://com.liwen.callocate/callocate" + "/" + info.phoneNumber),
+                      null, null, null, null);
+                      if(null != cu && cu.moveToFirst()) {
+                          calllocateLocation =  cu.getString(cu.getColumnIndex("location"));
+                          calllocateType = cu.getString(cu.getColumnIndex("type"));
+                          cu.close();
+                      }else if(null != cu ) {
+                          cu.close();
+                 }
+              }
+                 }catch(Exception e) {
+                    Log.e(LOG_TAG, "query calllocate error in CallCard:" + e);
+             }
 
             // Currently, info.phoneNumber may actually be a SIP address, and
             // if so, it might sometimes include the "sip:" prefix.  That
@@ -1201,6 +1229,18 @@ public class CallCard extends FrameLayout
             mLabel.setVisibility(View.VISIBLE);
         } else {
             mLabel.setVisibility(View.GONE);
+        }
+
+        // "Call location info"
+        if(null != calllocateLocation && null != calllocateType) {
+            mCallocateLocation.setText(calllocateLocation);
+            mCallocateType.setText(calllocateType);
+            mCallocateLocation.setVisibility(View.VISIBLE);
+            mCallocateType.setVisibility(View.VISIBLE);            
+        } else {
+          mCallocateLocation.setText(R.string.unknown);
+          mCallocateLocation.setVisibility(View.VISIBLE); 
+          mCallocateType.setVisibility(View.GONE);  
         }
 
         // Other text fields:
